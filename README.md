@@ -129,6 +129,8 @@ foundry-otel-langsmith/
 │   ├── agent.py         # Agent logic: create, run, extract response, cleanup
 │   └── tools/
 │       └── __init__.py
+├── scripts/
+│   └── validate_traces.py  # Local trace validation (no LangSmith needed)
 ├── tests/
 │   ├── __init__.py
 │   └── test_tracing.py  # Unit tests with InMemorySpanExporter (no network)
@@ -161,6 +163,34 @@ foundry-otel-langsmith/
 
 The `run_agent` function wraps everything in a custom `agent.run` span with attributes like message length, agent ID, run status, and response length — giving you a high-level view in LangSmith.
 
+## What You'll See in LangSmith
+
+When content recording is enabled, LangSmith displays rich trace details:
+
+```
+agent.run (root span)
+├── gen_ai.system: az.ai.agents
+├── gen_ai.request.model: gpt-4o
+├── gen_ai.usage.input_tokens: 1234
+├── gen_ai.usage.output_tokens: 567
+│
+├── create_agent (SDK auto-span)
+├── create_thread_and_process_run (SDK auto-span)
+│     └── includes token usage, model, thread/run IDs
+├── tool.code_interpreter (custom child span)
+│     ├── gen_ai.tool.input: "def fibonacci(n): ..."
+│     └── gen_ai.tool.output.0: "1, 1, 2, 3, 5, ..."
+└── list_messages (SDK auto-span)
+```
+
+### Local Validation (no LangSmith needed)
+
+```bash
+python scripts/validate_traces.py "Print hello world"
+```
+
+This prints the full span tree with attributes and validates GenAI semantic convention compliance.
+
 ## Running Tests
 
 ```bash
@@ -177,7 +207,7 @@ Tests use `InMemorySpanExporter` and mocked clients — no Azure or LangSmith cr
 
 | Environment Variable | Default | Description |
 |---------------------|---------|-------------|
-| `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` | `false` | Set to `true` to include prompt/response content in traces (⚠️ PII risk) |
+| `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` | `true` (in .env.example) | Include prompt/response content in traces (⚠️ PII risk in prod) |
 | `DEPLOYMENT_ENVIRONMENT` | `development` | Environment tag in traces |
 
 ## Troubleshooting
@@ -188,8 +218,8 @@ Tests use `InMemorySpanExporter` and mocked clients — no Azure or LangSmith cr
 | No traces in LangSmith | Verify `LANGSMITH_API_KEY` and `LANGSMITH_OTEL_ENDPOINT` are correct |
 | `ModuleNotFoundError` | Activate your venv and run `pip install -r requirements.txt` |
 | Agent run fails | Check that `MODEL_DEPLOYMENT_NAME` matches an active deployment in your project |
+| No tool spans in trace | Tool spans only appear if the agent invoked code interpreter |
 
 ## License
 
 MIT
-# test

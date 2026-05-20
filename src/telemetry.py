@@ -38,7 +38,12 @@ def init_tracing() -> TracerProvider:
 
     trace.set_tracer_provider(provider)
 
-    # Instrument the Azure AI Agents SDK — auto-creates spans for all agent ops
-    AIAgentsInstrumentor().instrument()
+    # Instrument the Azure AI Agents SDK — auto-creates spans for all agent ops.
+    # enable_content_recording includes prompt/response content in spans when the
+    # OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT env var is also "true".
+    capture_content = os.getenv(
+        "OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT", "false"
+    ).lower() == "true"
+    AIAgentsInstrumentor().instrument(enable_content_recording=capture_content)
 
     return provider
