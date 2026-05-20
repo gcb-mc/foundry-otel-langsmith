@@ -1,0 +1,8 @@
+azure-ai-projects>=1.0.0
+azure-ai-agents>=1.0.0
+azure-identity>=1.15.0
+azure-core-tracing-opentelemetry>=1.0.0b11
+opentelemetry-sdk>=1.24.0
+opentelemetry-exporter-otlp-proto-http>=1.24.0
+python-dotenv>=1.0.0
+pytest>=8.0.0

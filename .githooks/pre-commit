@@ -1,0 +1,12 @@
+#!/bin/sh
+# Pre-commit hook: strip notebook outputs to prevent leaking secrets
+# Requires: pip install nbconvert
+
+NOTEBOOKS=$(git diff --cached --name-only --diff-filter=ACM | grep '\.ipynb$')
+
+if [ -n "$NOTEBOOKS" ]; then
+    for nb in $NOTEBOOKS; do
+        jupyter nbconvert --clear-output --inplace "$nb" 2>/dev/null
+        git add "$nb"
+    done
+fi
