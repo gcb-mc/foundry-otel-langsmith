@@ -1,0 +1,18 @@
+repos:
+  - repo: local
+    hooks:
+      - id: strip-notebook-outputs
+        name: Strip notebook outputs
+        entry: jupyter nbconvert --clear-output --inplace
+        language: system
+        files: '\.ipynb$'
+        types: [file]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
